@@ -17,6 +17,34 @@ files into game assets you can version, review and rebuild alongside your game.
 [Read the DSL](docs/language/README.md) ·
 [Griffin source](examples/griffin/workbench/main.ashfox)
 
+## Use this fork with your agent
+
+This fork installs globally as `sya-ri-ashfox` alongside the official `ashfox`.
+Choose a source directory and share one installation across your projects.
+Copy this prompt into your coding agent; optionally specify the source directory
+or request an update in the same message.
+
+```text
+Read https://raw.githubusercontent.com/sya-ri/ashfox/main/docs/fork-agent.md
+in full and follow its setup or update instructions.
+
+Build and install sya-ri-ashfox globally so it can be used across my projects.
+Use the source directory I specify. Otherwise, follow the guide's directory
+selection rules. Reuse an existing fork checkout and remember its location
+for future updates.
+
+Keep the official Ashfox installation and unrelated files intact.
+Update an existing installation only if I requested an update.
+Preserve local source changes.
+
+After setup, create and verify the assets I requested. If I have not described
+an asset yet, ask what I want to make.
+```
+
+See the [fork setup and update guide](docs/fork-agent.md) for manual installation,
+source locations and rebuilding local changes. The linked website describes
+the upstream product; use this guide to install the fork.
+
 ## Game assets, with a source of truth
 
 A creature's proportions, its pixels, its rig and its motions can live in source

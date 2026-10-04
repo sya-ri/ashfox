@@ -4,31 +4,47 @@ const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { isStrictSemVer } = require('./validate');
+const { cliIdentity } = require('./identity');
+const { buildCli } = require('../../apps/cli/build');
 
-const packageCli = (root, out) => {
+const runNpm = (args, options = {}) => {
+  const npmCli = process.env.npm_execpath;
+  if (npmCli && path.basename(npmCli) === 'npm-cli.js') {
+    return execFileSync(process.execPath, [npmCli, ...args], options);
+  }
+  if (process.platform === 'win32') {
+    return execFileSync(process.execPath, [path.join(path.dirname(process.execPath),
+      'node_modules/npm/bin/npm-cli.js'), ...args], options);
+  }
+  return execFileSync('npm', args, options);
+};
+
+const packageCli = (root, out, fork = false) => {
+  const identity = cliIdentity(fork);
   const { version, engines } = JSON.parse(fs.readFileSync(path.join(root, 'package.json')));
   if (!isStrictSemVer(version)) throw new Error('Invalid product version');
   const stage = fs.mkdtempSync(path.join(os.tmpdir(), 'ashfox-package-'));
   try {
-    execFileSync(process.execPath, [path.join(root, 'apps/cli/build.js')], { cwd: root, stdio: 'inherit' });
+    const executable = buildCli(root, fork);
     fs.mkdirSync(path.join(stage, 'dist'));
     for (const [source, target] of [
-      ['apps/cli/dist/ashfox.cjs', 'dist/ashfox.cjs'],
-      ['apps/cli/README.md', 'README.md'], ['LICENSE', 'LICENSE']
+      [path.relative(root, executable), 'dist/ashfox.cjs'],
+      [identity.readme, 'README.md'], ['LICENSE', 'LICENSE']
     ]) fs.copyFileSync(path.join(root, source), path.join(stage, target));
     fs.chmodSync(path.join(stage, 'dist/ashfox.cjs'), 0o755);
     fs.writeFileSync(path.join(stage, 'package.json'), JSON.stringify({
-      name: '@ashfox/cli', version, description: 'Assets as Code for voxel games',
-      license: 'MIT', engines, bin: { ashfox: 'dist/ashfox.cjs' },
+      name: identity.name, version, description: 'Assets as Code for voxel games',
+      license: 'MIT', engines, bin: { [identity.command]: 'dist/ashfox.cjs' },
       files: ['dist/ashfox.cjs', 'README.md', 'LICENSE'],
-      repository: { type: 'git', url: 'https://github.com/sigee-min/ashfox.git' }
+      repository: { type: 'git', url: identity.repository }
     }, null, 2) + '\n');
     fs.mkdirSync(out, { recursive: true });
-    const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    const result = JSON.parse(execFileSync(npm, ['pack', '--ignore-scripts', '--json'], {
-      cwd: stage, encoding: 'utf8', shell: process.platform === 'win32'
+    const result = JSON.parse(runNpm(['pack', '--ignore-scripts', '--json'], {
+      cwd: stage, encoding: 'utf8'
     }));
-    fs.copyFileSync(path.join(stage, result[0].filename), path.join(out, 'ashfox-cli.tgz'));
+    const archive = path.join(out, identity.archive);
+    fs.copyFileSync(path.join(stage, result[0].filename), archive);
+    return archive;
   } finally { fs.rmSync(stage, { recursive: true, force: true }); }
 };
-module.exports = { packageCli };
+module.exports = { packageCli, runNpm };

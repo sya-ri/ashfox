@@ -16,7 +16,7 @@ if (!Object.hasOwn(profiles, profile) || process.argv.length > 3) {
 const tests = selectTests(discoverTests(path.join(__dirname, 'tests')).filter(profiles[profile]), {
   label: `CLI ${profile} tests`,
 });
-require('./build');
+require('./build').buildCli();
 for (const file of tests) {
   const result = spawnSync(process.execPath, ['-r', 'ts-node/register', file], {
     cwd: __dirname,
