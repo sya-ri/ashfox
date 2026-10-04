@@ -62,6 +62,9 @@ try {
   execFileSync('git', ['init', '--quiet'], { cwd: fixture });
   execFileSync('git', ['remote', 'add', 'origin', 'https://github.com/sya-ri/ashfox.git'], { cwd: fixture });
   assert.equal(isForkCheckout(fixture), true);
+  if (process.platform === 'win32') {
+    assert.equal(isForkCheckout(fixture.toLowerCase()), true, 'Windows checkout paths ignore case');
+  }
   execFileSync('git', ['remote', 'set-url', 'origin', 'https://github.com/sigee-min/ashfox.git'], { cwd: fixture });
   assert.equal(isForkCheckout(fixture), false);
   execFileSync('git', ['remote', 'set-url', 'origin', 'git@github.com:sya-ri/ashfox.git'], { cwd: fixture });

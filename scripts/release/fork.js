@@ -30,7 +30,7 @@ const isForkCheckout = directory => {
   try {
     const options = { cwd: directory, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] };
     const root = execFileSync('git', ['rev-parse', '--show-toplevel'], options).trim();
-    if (fs.realpathSync(root) !== fs.realpathSync(directory)) return false;
+    if (path.relative(fs.realpathSync(root), fs.realpathSync(directory)) !== '') return false;
     const remote = execFileSync('git', ['remote', 'get-url', 'origin'], options).trim();
     return /^(?:https:\/\/github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)sya-ri\/ashfox(?:\.git)?\/?$/.test(remote);
   } catch {
