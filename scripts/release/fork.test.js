@@ -61,7 +61,11 @@ try {
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(fixture, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
   execFileSync('git', ['init', '--quiet'], { cwd: fixture });
   execFileSync('git', ['remote', 'add', 'origin', 'https://github.com/sya-ri/ashfox.git'], { cwd: fixture });
-  assert.equal(isForkCheckout(fixture), true);
+  assert.equal(isForkCheckout(fixture), true, JSON.stringify({
+    fixture,
+    root: execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: fixture, encoding: 'utf8' }).trim(),
+    origin: execFileSync('git', ['remote', 'get-url', 'origin'], { cwd: fixture, encoding: 'utf8' }).trim()
+  }));
   if (process.platform === 'win32') {
     assert.equal(isForkCheckout(fixture.toLowerCase()), true, 'Windows checkout paths ignore case');
   }
