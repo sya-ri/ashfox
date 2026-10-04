@@ -68,6 +68,7 @@ try {
   }));
   if (process.platform === 'win32') {
     assert.equal(isForkCheckout(fixture.toLowerCase()), true, 'Windows checkout paths ignore case');
+    assert.equal(isForkCheckout(fs.realpathSync.native(fixture)), true, 'Windows checkout paths resolve short names');
   }
   execFileSync('git', ['remote', 'set-url', 'origin', 'https://github.com/sigee-min/ashfox.git'], { cwd: fixture });
   assert.equal(isForkCheckout(fixture), false);
@@ -87,7 +88,7 @@ try {
 
   const installed = installFork(fixture, config);
   assert.equal(installed, path.join(fork, 'dist/ashfox.cjs'));
-  assert.equal(readSource(config), fs.realpathSync(fixture));
+  assert.equal(readSource(config), fs.realpathSync.native(fixture));
   assert.equal(execute(installed, ['--version']).trim(), require('../../package.json').version);
   const metadata = JSON.parse(fs.readFileSync(path.join(fork, 'package.json')));
   assert.equal(metadata.name, 'sya-ri-ashfox');

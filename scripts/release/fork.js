@@ -30,7 +30,7 @@ const isForkCheckout = directory => {
   try {
     const options = { cwd: directory, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] };
     const root = execFileSync('git', ['rev-parse', '--show-toplevel'], options).trim();
-    if (path.relative(fs.realpathSync(root), fs.realpathSync(directory)) !== '') return false;
+    if (path.relative(fs.realpathSync.native(root), fs.realpathSync.native(directory)) !== '') return false;
     const remote = execFileSync('git', ['remote', 'get-url', 'origin'], options).trim();
     return /^(?:https:\/\/github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)sya-ri\/ashfox(?:\.git)?\/?$/.test(remote);
   } catch {
@@ -76,7 +76,7 @@ const installFork = (source, config) => {
   const expected = fs.readFileSync(path.join(source, 'apps/cli/dist/sya-ri-ashfox.cjs'));
   if (!fs.readFileSync(installed).equals(expected)) throw new Error('Installed CLI differs from the current fork build');
   execFileSync(process.execPath, [installed, '--version'], { stdio: 'inherit' });
-  rememberSource(config, fs.realpathSync(source));
+  rememberSource(config, fs.realpathSync.native(source));
   return installed;
 };
 
