@@ -6,14 +6,17 @@ import { findChrome } from './browser';
 
 declare const ASHFOX_VERSION: string;
 declare const ASHFOX_STARTER: Readonly<Record<string, string>>;
+declare const ASHFOX_COMMAND: string;
+declare const ASHFOX_GUIDE: string;
 export const cliVersion = ASHFOX_VERSION;
+export const cliCommand = ASHFOX_COMMAND;
 export const isOnboardingCommand = (command: string): boolean =>
   ['help', '--help', '--version', 'doctor', 'init'].includes(command);
-const help = `Ashfox ${ASHFOX_VERSION} — game assets from code
+const help = `${cliCommand === 'ashfox' ? 'Ashfox' : cliCommand} ${ASHFOX_VERSION} — game assets from code
 
 Start in your project folder:
-  ashfox init my-game
-  ashfox build my-game/.ashfoxworkspace.mjs --json
+  ${cliCommand} init my-game
+  ${cliCommand} build my-game/.ashfoxworkspace.mjs --json
 
 Commands:
   init <new-folder>        Create a grouped asset project offline
@@ -30,7 +33,7 @@ Commands:
 
 --output <file> saves media; existing files are refused.
 --version prints the installed product version. doctor/init accept --json.
-Full options: https://ashfox.io/docs/guides/cli/
+Full options: ${ASHFOX_GUIDE}
 `;
 const emit = (command: string, value: unknown, json: boolean, human: string): void => {
   process.stdout.write(json ? JSON.stringify({ format: 'ashfox-cli-result', version: 1, command,
@@ -55,7 +58,7 @@ const init = (folder: string, json: boolean): void => {
     throw error;
   }
   emit('init', { directory: target, files: Object.keys(ASHFOX_STARTER), version: cliVersion }, json,
-      `Created asset project in ${folder}\nSources: asset/ · Generated output: build/\nBuild: ashfox build ${folder}/.ashfoxworkspace.mjs --json\nIntegration: node ${folder}/assets.mjs\n`);
+      `Created asset project in ${folder}\nSources: asset/ · Generated output: build/\nBuild: ${cliCommand} build ${folder}/.ashfoxworkspace.mjs --json\nIntegration: node ${folder}/assets.mjs\n`);
 };
 const doctor = (json: boolean): void => {
   const chrome = findChrome();
@@ -67,7 +70,7 @@ const doctor = (json: boolean): void => {
   emit('doctor', { version: cliVersion, node: process.version, platform: process.platform, arch: process.arch,
     exports: { glb: true, png: true, wav: true }, capture: { available: capture, executable: chrome ?? null },
     ogg: { available: ogg, executable: encoder } }, json,
-    `Ashfox ${cliVersion} · Node ${process.version}\nGLB / PNG / WAV: ready\nCapture: ${capture ? 'ready' : 'optional — install Chrome or set ASHFOX_CHROME_PATH'}\nOGG: ${ogg ? 'ready' : 'optional — install FFmpeg with libvorbis or set ASHFOX_FFMPEG_PATH'}\n`);
+    `${cliCommand === 'ashfox' ? 'Ashfox' : cliCommand} ${cliVersion} · Node ${process.version}\nGLB / PNG / WAV: ready\nCapture: ${capture ? 'ready' : 'optional — install Chrome or set ASHFOX_CHROME_PATH'}\nOGG: ${ogg ? 'ready' : 'optional — install FFmpeg with libvorbis or set ASHFOX_FFMPEG_PATH'}\n`);
 };
 export const runOnboarding = (args: readonly string[]): boolean => {
   const command = args[0] ?? 'help';
@@ -82,7 +85,7 @@ export const runOnboarding = (args: readonly string[]): boolean => {
     throw new BuildFailure('cli.arguments', 'Only --json is supported for this command.', 2);
   }
   const positional = rest.filter(arg => arg !== '--json');
-  if (positional.length !== (command === 'init' ? 1 : 0)) throw new BuildFailure('cli.arguments', command === 'init' ? 'Usage: ashfox init <new-folder> [--json]' : 'Usage: ashfox doctor [--json]', 2);
+  if (positional.length !== (command === 'init' ? 1 : 0)) throw new BuildFailure('cli.arguments', command === 'init' ? `Usage: ${cliCommand} init <new-folder> [--json]` : `Usage: ${cliCommand} doctor [--json]`, 2);
   if (command === 'init') init(positional[0], rest.includes('--json')); else doctor(rest.includes('--json'));
   return true;
 };

@@ -74,3 +74,4 @@ jobs:
       - run: npm run test:audio-core
       - run: npm run build:cli
       - run: node scripts/release/sound.js
+      - run: npm run test:fork-cli

@@ -74,6 +74,12 @@ Real rendering needs Chrome or Chromium; select it with `ASHFOX_CHROME_PATH`.
 Audio encoding and showcase movies need FFmpeg; select it with `ASHFOX_FFMPEG_PATH`.
 Compilation and regular CLI checks do not require a browser UI session.
 
+For the globally installed fork CLI, run `npm run build:fork-cli` to create its
+archive and `npm run install:fork-cli -- --source-directory <absolute-path>` to
+build, install and remember the checkout. Run `npm run test:fork-cli` to check
+source selection, global coexistence and shared rebuilds. See the
+[fork agent guide](docs/fork-agent.md) for setup and update behavior.
+
 ## Examples and media
 
 `examples/` owns native sources. `assets/` contains published example media and

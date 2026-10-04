@@ -1,5 +1,5 @@
 import { AUDIO_POLICY } from '@ashfox/audio-core';
-import { runOnboarding, cliVersion, isOnboardingCommand } from './onboarding/cli';
+import { runOnboarding, cliVersion, cliCommand, isOnboardingCommand } from './onboarding/cli';
 import { runObservation } from './observe/cli';
 import { prepare } from './observe/prepare';
 import { observationCapabilities } from './observe/session';
@@ -35,7 +35,7 @@ const main = async (): Promise<void> => {
       sound: { contract: AUDIO_POLICY, sources: ['noise', 'fm', 'vocal', 'chirp', 'resonator'], features: ['curves', 'sequences', 'variation', 'loops'], sampleRate: 48000, channels: 1, loopCodecs: ['wav'], output: 'fixed-gain', limits: { durationSeconds: 30, variants: 8, workspaceSources: 32, workspaceRawFrames: 11520000, eventFrames: 24000000, weightedFrames: 192000000 } },
       source: '.ashfox', outputs: ['glb', 'png', 'wav', 'java_block', 'geckolib5', 'bedrock'], legacyFallback: false,
       packs: { formats: ['minecraft_java', 'game_assets'], itemDefinitions: ['legacy', 'modern'], metadata: ['legacy', 'range'], audio: 'vorbis', encoder: 'FFmpeg via PATH or ASHFOX_FFMPEG_PATH', archive: 'zip' },
-      usage: 'ashfox check|build <source|workspace>; ashfox verify <build-directory>; ashfox inspect|capture|replay|export <source|png> [options]; ashfox stdio' });
+      usage: `${cliCommand} check|build <source|workspace>; ${cliCommand} verify <build-directory>; ${cliCommand} inspect|capture|replay|export <source|png> [options]; ${cliCommand} stdio` });
     return;
   }
   if (!['check', 'build', 'verify'].includes(command) || positional.length !== 1) {
@@ -79,7 +79,7 @@ const executeWorker = async (): Promise<void> => {
 if (!isMainThread) { parentPort!.on('message', message => { if (message === 'cancel') controller.abort(); }); void executeWorker(); }
 else void main().catch((error: unknown) => {
   const failure = error instanceof BuildFailure ? error : new BuildFailure('build.failure', error instanceof Error ? error.message : String(error), 3);
-  if (isOnboardingCommand(command) && !args.includes('--json')) process.stderr.write(`ashfox: ${failure.message}\n`);
+  if (isOnboardingCommand(command) && !args.includes('--json')) process.stderr.write(`${cliCommand}: ${failure.message}\n`);
   else if (['inspect','capture','replay','export','stdio'].includes(command)) process.stderr.write(JSON.stringify({ok:false,error:{code:failure.code,message:failure.message}})+'\n');
   else result(false, null, [{ severity: 'error', code: failure.code, message: failure.message }]);
   process.exitCode = failure.exitCode;
